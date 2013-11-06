@@ -1,0 +1,22 @@
+SCompassTrack = Created by Spoutnik87
+
+Changelog :
+1.5 : 
+- Check update system added.
+- Cleaning code.
+
+1.4 :
+- Added multi-world support.
+- Added reverse controls option.
+
+1.3 : 
+- Fixed error in config file reader.
+
+1.2 : 
+- Fixed PlayerLeaveEvent problem.
+
+1.1 :
+- Bug fix.
+
+1.0 :
+- Initial release.
