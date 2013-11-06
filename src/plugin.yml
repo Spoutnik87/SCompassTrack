@@ -1,0 +1,11 @@
+name: SCompassTrack
+main: fr.Spoutnik87.SCompassTrack.Main
+version: 1.5
+author: Spoutnik87
+permissions:
+    scompasstrack.track:
+        description: Allow player to track another player.
+        default: op
+    scompasstrack.untrackable:
+        description: Allow player to be untrackable.
+        default: false
