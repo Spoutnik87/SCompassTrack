@@ -12,11 +12,19 @@ SCompassTrack:
       noplayer: '&3Aucun joueur proche de vous.'
       nopermission: '&3Vous n''avez pas la permission.'
       spawntarget: '&3Votre boussole pointe vers le spawn.'
-      playertarget: '&3Votre boussole pointe vers : &2@ptarget &3� &2@d &3blocs d''ici.'
-      incorrectworld: '&3La boussole n''est pas autoris� dans ce monde.'
+      playertarget: '&3Votre boussole pointe vers : &2@ptarget &3à &2@d &3blocs d''ici.'
+      incorrectworld: '&3La boussole n''est pas autorisée dans ce monde.'
     en:
       noplayer: '&3No player near you.'
       nopermission: '&3You don''t have permission.'
       spawntarget: '&3Your compass is pointing to the spawn.'
       playertarget: '&3Your compass is pointing to : &2@ptarget &3at &2@d &3block.'
       incorrectworld: '&3Compass is not allowed in this world.'
+    #Brazilian by Guihgo
+    br:
+      noplayer: '&cNão tem nenhum player perto de você.'
+      nopermission: '&4Você nâo ter permissão.'
+      spawntarget: '&3Apontando para  o Spawn.'
+      playertarget: '&3Apontando para:&2@ptarget &eque esta &2@d &3blocos
+        de você.'
+      incorrectworld: '&3Bússula não esta hablitada neste lugar.'
