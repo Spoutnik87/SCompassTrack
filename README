@@ -4,6 +4,9 @@ Changelog :
 1.5 : 
 - Check update system added.
 - Cleaning code.
+- Optimizations
+- Added 4 events for developers (TargetSearchEvent, TargetGetEvent, TargetChangeEvent, TargetLoseEvent).
+- Added brazilian and russian languages.
 
 1.4 :
 - Added multi-world support.

@@ -14,15 +14,14 @@ public class UpdateChecker {
 	private URL url;
 	private String version = "";
 	private String link = "";
-	
+
 	public UpdateChecker(Main p, String url) {
 		this.p = p;
-		
 		try {
 			this.url = new URL(url);
 		} catch (Exception ex) {}
 	}
-	
+
 	public boolean checkUpdate() {
 		try {
 			InputStream input = this.url.openConnection().getInputStream();
@@ -30,18 +29,25 @@ public class UpdateChecker {
 			Node lf = doc.getElementsByTagName("item").item(0);
 			NodeList c = lf.getChildNodes();
 			version = c.item(1).getTextContent().replaceAll("[a-zA-Z]", "");
+			version = version.replaceAll(" ", "");
 			link = c.item(3).getTextContent();
-			if (!p.getDescription().getVersion().equals(version)) {
-				return true;
+			try {
+				double v = Double.parseDouble(version);
+				double d = Double.parseDouble(p.getDescription().getVersion());
+				if (v > d) return true;
+				else if (v <= d) return false;
+			}
+			catch (Exception ex) {
+				if (!p.getDescription().getVersion().equals(version)) return true;
 			}
 		} catch (Exception ex) {}
 		return false;
 	}
-	
+
 	public String getVersion() {
 		return this.version;
 	}
-	
+
 	public String getLink() {
 		return this.link;
 	}

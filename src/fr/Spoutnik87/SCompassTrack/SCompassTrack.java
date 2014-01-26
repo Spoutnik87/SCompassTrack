@@ -19,7 +19,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * 
  * @author Spoutnik87
  */
-@SuppressWarnings("rawtypes")
 public class SCompassTrack implements Listener {
 
 	// General values
@@ -42,23 +41,24 @@ public class SCompassTrack implements Listener {
 	private boolean paow;
 	private boolean useworldwhitelist;
 
-	private List worldwhitelist;
+	private List<String> worldwhitelist;
 
 	public SCompassTrack(Main main) {
 		this.main = main;
 		this.readConfig();
 		this.target = new HashMap<Player, Player>();
 	}
-
+	
 	@EventHandler
 	public void onLeave(PlayerQuitEvent event) {
-		for (Map.Entry mapEntry : this.target.entrySet()) {
+		for (Map.Entry<Player, Player> mapEntry : target.entrySet()) {
 			if (mapEntry.getKey() == event.getPlayer()) {
+				Bukkit.getServer().getPluginManager().callEvent(new TargetLoseEvent((Player) mapEntry.getKey(), (Player) mapEntry.getValue()));
 				this.target.remove(mapEntry.getKey());
 			}
 			if (mapEntry.getValue() == event.getPlayer()) {
-				((Player) mapEntry.getKey()).sendMessage(prefix
-						+ convertConfig(noplayer, null, null, 0));
+				((Player) mapEntry.getKey()).sendMessage(prefix + convertConfig(noplayer, null, null, 0));
+				Bukkit.getServer().getPluginManager().callEvent(new TargetLoseEvent((Player) mapEntry.getKey(), (Player) mapEntry.getValue()));
 				this.target.remove(mapEntry.getKey());
 			}
 		}
@@ -67,9 +67,7 @@ public class SCompassTrack implements Listener {
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player p = event.getPlayer();
-		if (!paow && worldwhitelist != null) {
-			if (!worldwhitelist.contains(p.getWorld().getName())) return;
-		}
+		if (!paow && worldwhitelist != null) if (!worldwhitelist.contains(p.getWorld().getName())) return;
 		else if (!paow && worldwhitelist == null) return;
 		Player ptarget = null;
 		if (event.getMaterial() != Material.COMPASS) return;
@@ -98,39 +96,35 @@ public class SCompassTrack implements Listener {
 			return;
 		}
 		if ((event.getAction().equals(a1)) || (event.getAction().equals(a2))) {
+			Bukkit.getServer().getPluginManager().callEvent(new TargetSearchEvent(p));
 			if (!p.hasPermission("scompasstrack.track")) {
-				p.sendMessage(prefix
-						+ convertConfig(nopermission, p, ptarget, 0).toString());
+				p.sendMessage(prefix + convertConfig(nopermission, p, ptarget, 0));
 				return;
 			}
 
 			for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-				if ((p.getWorld() == p2.getWorld()) && (p != p2)
-						&& (ptarget == null)) {
+				if ((p.getWorld() == p2.getWorld()) && (p != p2) && (ptarget == null)) {
 					d = p.getLocation().distance(p2.getLocation());
-					if (d <= distance) {
-						ptarget = p2;
-					}
+					if (d <= distance) ptarget = p2;
 				}
 			}
 
 			if (ptarget == null) {
 				p.setCompassTarget(p.getWorld().getSpawnLocation());
-				p.sendMessage(prefix
-						+ convertConfig(noplayer, p, ptarget, 0).toString());
+				p.sendMessage(prefix + convertConfig(noplayer, p, ptarget, 0));
 				return;
 			}
 			if (ptarget.hasPermission("scompasstrack.untrackable")) {
 				p.setCompassTarget(p.getWorld().getSpawnLocation());
-				p.sendMessage(prefix
-						+ convertConfig(noplayer, p, ptarget, 0).toString());
+				p.sendMessage(prefix + convertConfig(noplayer, p, ptarget, 0));
 				return;
 			}
 
 			d = Math.round(d);
 			int roundD = (int) d;
-			p.sendMessage(prefix
-					+ convertConfig(playertarget, p, ptarget, roundD));
+			p.sendMessage(prefix + convertConfig(playertarget, p, ptarget, roundD));
+			if (target.get(p) != null) Bukkit.getServer().getPluginManager().callEvent(new TargetChangeEvent(p, target.get(p), ptarget));
+			else Bukkit.getServer().getPluginManager().callEvent(new TargetGetEvent(p, ptarget));
 			this.target.put(p, ptarget);
 		}
 
@@ -142,25 +136,23 @@ public class SCompassTrack implements Listener {
 
 	@EventHandler
 	public void onMove(PlayerMoveEvent event) {
-		if (this.target.get(event.getPlayer()) != null) {
-			event.getPlayer()
-					.setCompassTarget(
-							((Player) this.target.get(event.getPlayer()))
-									.getLocation());
-		}
+		if (this.target.get(event.getPlayer()) != null) event.getPlayer().setCompassTarget(((Player) this.target.get(event.getPlayer())).getLocation());
+		else return;
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Player ct = (Player) this.target.get(p);
 			if (ct == event.getPlayer())
 				if (p.getWorld() == event.getPlayer().getWorld()) {
-					if (p.getLocation().distance(
-							event.getPlayer().getLocation()) <= this.distance) {
+					if (p.getLocation().distance(event.getPlayer().getLocation()) <= this.distance) {
+						Bukkit.getServer().getPluginManager().callEvent(new TargetLoseEvent(p, target.get(p)));
 						this.target.remove(p);
 						p.setCompassTarget(p.getWorld().getSpawnLocation());
 					}
 					p.setCompassTarget(event.getPlayer().getLocation());
-				} else {
+				} 
+				else {
 					p.sendMessage(prefix + convertConfig(noplayer, p, null, 0));
+					Bukkit.getServer().getPluginManager().callEvent(new TargetLoseEvent(p, target.get(p)));
 					this.target.remove(p);
 				}
 		}
@@ -168,7 +160,9 @@ public class SCompassTrack implements Listener {
 
 	/** Read the config file */
 	public void readConfig() {
-		prefix = convertConfig(main.getConfig().getString("SCompassTrack.general.prefix"),null, null, 0).toString();
+		prefix = convertConfig(
+				main.getConfig().getString("SCompassTrack.general.prefix"),
+				null, null, 0);
 		lang = main.getConfig().getString("SCompassTrack.general.lang");
 		rctp = main.getConfig().getBoolean("SCompassTrack.general.userightclicktotrackplayer");
 		worldwhitelist = main.getConfig().getStringList("SCompassTrack.general.worldwhitelist");
@@ -182,134 +176,83 @@ public class SCompassTrack implements Listener {
 		useworldwhitelist = main.getConfig().getBoolean("SCompassTrack.general.useworldwhitelist");
 	}
 
-	public static StringBuffer convertConfig(String configValue, Player p,
-			Player ptarget, int d) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(configValue);
-
-		while (stringBufferContains(buffer, "@ptarget")) {
-			String str = buffer.substring(buffer.indexOf("@ptarget")
-					+ "@ptarget".length());
-			buffer.replace((buffer.indexOf("@ptarget")), buffer.length(), "");
-			buffer.append(ptarget.getName());
-			buffer.append(str);
+	public static String convertConfig(String s, Player p, Player ptarget, int d) {
+		while (s.contains("@ptarget")) {
+			String str = s.substring(s.indexOf("@ptarget")+8);
+			s = s.substring(0, s.indexOf("@ptarget")) + ptarget.getName() + str;
 		}
-		while (stringBufferContains(buffer, "@p")) {
-			String str = buffer.substring(buffer.indexOf("@p") + "@p".length());
-			buffer.replace((buffer.indexOf("@p")), buffer.length(), "");
-			buffer.append(p.getName());
-			buffer.append(str);
+		while (s.contains("@p")) {
+			String str = s.substring(s.indexOf("@p")+2);
+			s = s.substring(0, s.indexOf("@p")) + p.getName() + str;
 		}
-		while (stringBufferContains(buffer, "@d")) {
-			String str = buffer.substring(buffer.indexOf("@d") + "@d".length());
-			buffer.replace((buffer.indexOf("@d")), buffer.length(), "");
-			buffer.append(d);
-			buffer.append(str);
+		while (s.contains("@d")) {
+			String str = s.substring(s.indexOf("@d")+2);
+			s = s.substring(0, s.indexOf("@d")) + d + str;
 		}
-		while (stringBufferContains(buffer, "&4")) {
-			String str = buffer.substring(buffer.indexOf("&4") + "&4".length());
-			buffer.replace((buffer.indexOf("&4")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_RED);
-			buffer.append(str);
+		while (s.contains("&4")) {
+			String str = s.substring(s.indexOf("&4")+2);
+			s = s.substring(0, s.indexOf("&4")) + ChatColor.DARK_RED + str;
 		}
-		while (stringBufferContains(buffer, "&c")) {
-			String str = buffer.substring(buffer.indexOf("&c") + "&c".length());
-			buffer.replace((buffer.indexOf("&c")), buffer.length(), "");
-			buffer.append(ChatColor.RED);
-			buffer.append(str);
+		while (s.contains("&c")) {
+			String str = s.substring(s.indexOf("&c")+2);
+			s = s.substring(0, s.indexOf("&c")) + ChatColor.RED + str;
 		}
-		while (stringBufferContains(buffer, "&6")) {
-			String str = buffer.substring(buffer.indexOf("&6") + "&6".length());
-			buffer.replace((buffer.indexOf("&6")), buffer.length(), "");
-			buffer.append(ChatColor.GOLD);
-			buffer.append(str);
+		while (s.contains("&6")) {
+			String str = s.substring(s.indexOf("&6")+2);
+			s = s.substring(0, s.indexOf("&6")) + ChatColor.GOLD + str;
 		}
-		while (stringBufferContains(buffer, "&e")) {
-			String str = buffer.substring(buffer.indexOf("&e") + "&e".length());
-			buffer.replace((buffer.indexOf("&e")), buffer.length(), "");
-			buffer.append(ChatColor.YELLOW);
-			buffer.append(str);
+		while (s.contains("&e")) {
+			String str = s.substring(s.indexOf("&e")+2);
+			s = s.substring(0, s.indexOf("&e")) + ChatColor.YELLOW + str;
 		}
-		while (stringBufferContains(buffer, "&2")) {
-			String str = buffer.substring(buffer.indexOf("&2") + "&2".length());
-			buffer.replace((buffer.indexOf("&2")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_GREEN);
-			buffer.append(str);
+		while (s.contains("&2")) {
+			String str = s.substring(s.indexOf("&2")+2);
+			s = s.substring(0, s.indexOf("&2")) + ChatColor.DARK_GREEN + str;
 		}
-		while (stringBufferContains(buffer, "&a")) {
-			String str = buffer.substring(buffer.indexOf("&a") + "&a".length());
-			buffer.replace((buffer.indexOf("&a")), buffer.length(), "");
-			buffer.append(ChatColor.GREEN);
-			buffer.append(str);
+		while (s.contains("&a")) {
+			String str = s.substring(s.indexOf("&a")+2);
+			s = s.substring(0, s.indexOf("&a")) + ChatColor.GREEN + str;
 		}
-		while (stringBufferContains(buffer, "&b")) {
-			String str = buffer.substring(buffer.indexOf("&b") + "&b".length());
-			buffer.replace((buffer.indexOf("&b")), buffer.length(), "");
-			buffer.append(ChatColor.AQUA);
-			buffer.append(str);
+		while (s.contains("&b")) {
+			String str = s.substring(s.indexOf("&b")+2);
+			s = s.substring(0, s.indexOf("&b")) + ChatColor.AQUA + str;
 		}
-		while (stringBufferContains(buffer, "&3")) {
-			String str = buffer.substring(buffer.indexOf("&3") + "&3".length());
-			buffer.replace((buffer.indexOf("&3")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_AQUA);
-			buffer.append(str);
+		while (s.contains("&3")) {
+			String str = s.substring(s.indexOf("&3")+2);
+			s = s.substring(0, s.indexOf("&3")) + ChatColor.DARK_AQUA + str;
 		}
-		while (stringBufferContains(buffer, "&1")) {
-			String str = buffer.substring(buffer.indexOf("&1") + "&1".length());
-			buffer.replace((buffer.indexOf("&1")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_BLUE);
-			buffer.append(str);
+		while (s.contains("&1")) {
+			String str = s.substring(s.indexOf("&1")+2);
+			s = s.substring(0, s.indexOf("&1")) + ChatColor.DARK_BLUE + str;
 		}
-		while (stringBufferContains(buffer, "&9")) {
-			String str = buffer.substring(buffer.indexOf("&9") + "&9".length());
-			buffer.replace((buffer.indexOf("&9")), buffer.length(), "");
-			buffer.append(ChatColor.AQUA);
-			buffer.append(str);
+		while (s.contains("&9")) {
+			String str = s.substring(s.indexOf("&9")+2);
+			s = s.substring(0, s.indexOf("&9")) + ChatColor.AQUA + str;
 		}
-		while (stringBufferContains(buffer, "&d")) {
-			String str = buffer.substring(buffer.indexOf("&d") + "&d".length());
-			buffer.replace((buffer.indexOf("&d")), buffer.length(), "");
-			buffer.append(ChatColor.LIGHT_PURPLE);
-			buffer.append(str);
+		while (s.contains("&d")) {
+			String str = s.substring(s.indexOf("&d")+2);
+			s = s.substring(0, s.indexOf("&d")) + ChatColor.LIGHT_PURPLE + str;
 		}
-		while (stringBufferContains(buffer, "&5")) {
-			String str = buffer.substring(buffer.indexOf("&5") + "&5".length());
-			buffer.replace((buffer.indexOf("&5")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_PURPLE);
-			buffer.append(str);
+		while (s.contains("&5")) {
+			String str = s.substring(s.indexOf("&5")+2);
+			s = s.substring(0, s.indexOf("&5")) + ChatColor.DARK_PURPLE + str;
 		}
-		while (stringBufferContains(buffer, "&f")) {
-			String str = buffer.substring(buffer.indexOf("&f") + "&f".length());
-			buffer.replace((buffer.indexOf("&f")), buffer.length(), "");
-			buffer.append(ChatColor.WHITE);
-			buffer.append(str);
+		while (s.contains("&f")) {
+			String str = s.substring(s.indexOf("&f")+2);
+			s = s.substring(0, s.indexOf("&f")) + ChatColor.WHITE + str;
 		}
-		while (stringBufferContains(buffer, "&7")) {
-			String str = buffer.substring(buffer.indexOf("&7") + "&7".length());
-			buffer.replace((buffer.indexOf("&7")), buffer.length(), "");
-			buffer.append(ChatColor.GRAY);
-			buffer.append(str);
+		while (s.contains("&7")) {
+			String str = s.substring(s.indexOf("&7")+2);
+			s = s.substring(0, s.indexOf("&7")) + ChatColor.GRAY + str;
 		}
-		while (stringBufferContains(buffer, "&8")) {
-			String str = buffer.substring(buffer.indexOf("&8") + "&8".length());
-			buffer.replace((buffer.indexOf("&8")), buffer.length(), "");
-			buffer.append(ChatColor.DARK_GRAY);
-			buffer.append(str);
+		while (s.contains("&8")) {
+			String str = s.substring(s.indexOf("&8")+2);
+			s = s.substring(0, s.indexOf("&8")) + ChatColor.DARK_GRAY + str;
 		}
-		while (stringBufferContains(buffer, "&0")) {
-			String str = buffer.substring(buffer.indexOf("&0") + "&0".length());
-			buffer.replace((buffer.indexOf("&0")), buffer.length(), "");
-			buffer.append(ChatColor.BLACK);
-			buffer.append(str);
+		while (s.contains("&0")) {
+			String str = s.substring(s.indexOf("&0")+2);
+			s = s.substring(0, s.indexOf("&0")) + ChatColor.BLACK + str;
 		}
-		return buffer;
-	}
-
-	/** Method contains for StringBuffer */
-	public static boolean stringBufferContains(StringBuffer buffer, String s) {
-		if (buffer.indexOf(s) != -1) {
-			return true;
-		} else
-			return false;
+		return s;
 	}
 }
