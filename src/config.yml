@@ -1,7 +1,7 @@
 SCompassTrack:
   general:
     radius: '200'
-    lang: fr
+    lang: en
     prefix: '&e[SCT] '
     userightclicktotrackplayer: true
     useworldwhitelist: false
@@ -20,11 +20,15 @@ SCompassTrack:
       spawntarget: '&3Your compass is pointing to the spawn.'
       playertarget: '&3Your compass is pointing to : &2@ptarget &3at &2@d &3block.'
       incorrectworld: '&3Compass is not allowed in this world.'
-    #Brazilian by Guihgo
     br:
-      noplayer: '&cNão tem nenhum player perto de você.'
-      nopermission: '&4Você nâo ter permissão.'
+      noplayer: '&3Não tem nenhum player perto de você.'
+      nopermission: '&3Você nâo ter permissão.'
       spawntarget: '&3Apontando para  o Spawn.'
-      playertarget: '&3Apontando para:&2@ptarget &eque esta &2@d &3blocos
-        de você.'
+      playertarget: '&3Apontando para:&2@ptarget &3que esta &2@d &3blocos de você.'
       incorrectworld: '&3Bússula não esta hablitada neste lugar.'
+    ru:
+      noplayer: '&3Нет никакого игрока рядом с вами.'
+      nopermission: '&3У ваc нет разрешения.'
+      spawntarget: '&3Ваш компас указывает на спаун.'
+      playertarget: '&3Ваш компас указывает на : &2@ptarget &3в &2@d &3блоках отсюда.'
+      incorrectworld: '&3Ваш компас не разрешëн здесь.'
