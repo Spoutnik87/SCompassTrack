@@ -2,6 +2,8 @@ name: SCompassTrack
 main: fr.Spoutnik87.SCompassTrack.Main
 version: 1.5
 author: Spoutnik87
+website: http://dev.bukkit.org/bukkit-plugins/scompasstrack/
+description: This plugin allow players to track other players.
 permissions:
     scompasstrack.track:
         description: Allow player to track another player.

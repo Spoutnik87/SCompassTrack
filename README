@@ -6,7 +6,7 @@ Changelog :
 - Cleaning code.
 - Optimizations
 - Added 4 events for developers (TargetSearchEvent, TargetGetEvent, TargetChangeEvent, TargetLoseEvent).
-- Added brazilian and russian languages.
+- Added brazilian, german and russian languages.
 
 1.4 :
 - Added multi-world support.

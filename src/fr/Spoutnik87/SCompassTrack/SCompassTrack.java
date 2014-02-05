@@ -1,7 +1,7 @@
 package fr.Spoutnik87.SCompassTrack;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -40,9 +40,9 @@ public class SCompassTrack implements Listener {
 	/** Plugin activated on other worlds */
 	private boolean paow;
 	private boolean useworldwhitelist;
-
 	private List<String> worldwhitelist;
-
+	private static boolean checkUpdate;
+	
 	public SCompassTrack(Main main) {
 		this.main = main;
 		this.readConfig();
@@ -137,7 +137,6 @@ public class SCompassTrack implements Listener {
 	@EventHandler
 	public void onMove(PlayerMoveEvent event) {
 		if (this.target.get(event.getPlayer()) != null) event.getPlayer().setCompassTarget(((Player) this.target.get(event.getPlayer())).getLocation());
-		else return;
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Player ct = (Player) this.target.get(p);
@@ -174,8 +173,13 @@ public class SCompassTrack implements Listener {
 		distance = Double.parseDouble(main.getConfig().getString("SCompassTrack.general.radius"));
 		paow = main.getConfig().getBoolean("SCompassTrack.general.pluginactivatedonotherworld");
 		useworldwhitelist = main.getConfig().getBoolean("SCompassTrack.general.useworldwhitelist");
+		checkUpdate = main.getConfig().getBoolean("SCompassTrack.general.checkupdate");
 	}
-
+	
+	public static boolean checkUpdate() {
+		return checkUpdate;
+	}
+	
 	public static String convertConfig(String s, Player p, Player ptarget, int d) {
 		while (s.contains("@ptarget")) {
 			String str = s.substring(s.indexOf("@ptarget")+8);

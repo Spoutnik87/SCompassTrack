@@ -7,6 +7,7 @@ SCompassTrack:
     useworldwhitelist: false
     worldwhitelist: ''
     pluginactivatedonotherworld: true
+    checkupdate: true
   lang:
     fr:
       noplayer: '&3Aucun joueur proche de vous.'
@@ -19,7 +20,13 @@ SCompassTrack:
       nopermission: '&3You don''t have permission.'
       spawntarget: '&3Your compass is pointing to the spawn.'
       playertarget: '&3Your compass is pointing to : &2@ptarget &3at &2@d &3block.'
-      incorrectworld: '&3Compass is not allowed in this world.'
+      incorrectworld: '&3The compass is not allowed in this world.'
+    de:
+      noplayer: '&3Kein Spieler in Ihrer Nähe.'
+      nopermission: '&3Sie haben keine Berechtigung.'
+      spawntarget: '&3Ihr Kompass zeigt auf der spawn.'
+      playertarget: '&3Ihr Kompass zeigt auf der : &2@ptarget &3auf &2@d &3block.'
+      incorrectworld: '&3Der Kompass ist in dieser Welt nicht erlaubt.'
     br:
       noplayer: '&3Não tem nenhum player perto de você.'
       nopermission: '&3Você nâo ter permissão.'
